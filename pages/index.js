@@ -1,36 +1,8 @@
 import appConfig from '../config.json';
+import defaultImg from '../img/default.jpg';
+import React, { useEffect } from 'react';
+import { useRouter } from 'next/router';
 import { Box, Button, Text, TextField, Image } from '@skynexui/components';
-
-function GlobalStyle() {
-  return (
-    <style global jsx>{`
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-        list-style: none;
-      }
-      body {
-        font-family: 'Open Sans', sans-serif;
-      }
-      /* App fit Height */
-      html,
-      body,
-      #__next {
-        min-height: 100vh;
-        display: flex;
-        flex: 1;
-      }
-      #__next {
-        flex: 1;
-      }
-      #__next > * {
-        flex: 1;
-      }
-      /* ./App fit Height */
-    `}</style>
-  );
-}
 
 function Title(props) {
   const Tag = props.tag || 'h1';
@@ -48,32 +20,32 @@ function Title(props) {
   );
 }
 
-// // function HomePage() {
-// //   return (
-// //     <div>
-// //       <GlobalStyle />
-// //       <Title tag="h1">Seja Bem Vindo à Taverna</Title>
-// //       <h2>Discord - Alura Matrix</h2>
-// //     </div>
-// //   );
-// // }
-
-// export default HomePage;
-
 export default function PaginaInicial() {
-  const username = 'minokael';
+  const [username, setUsername] = React.useState('');
+  const [name, setName] = React.useState('');
+  const [location, setLocation] = React.useState('');
+  const user = username.length > 2 ? username : '';
+  const route = useRouter();
 
+  useEffect(() => {
+    user
+      ? fetch(`https://api.github.com/users/${user}`)
+          .then(res => res.json())
+          .then(data => {
+            setName(data.name), setLocation(data.location);
+          })
+      : setName('');
+  });
   return (
     <>
-      <GlobalStyle />
       <Box
         styleSheet={{
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          backgroundColor: appConfig.theme.colors.primary[500],
+          //backgroundColor: appConfig.theme.colors.primary[500],
           backgroundImage:
-            'url(https://virtualbackgrounds.site/wp-content/uploads/2020/08/the-matrix-digital-rain.jpg)',
+            'url(https://cdn1.epicgames.com/ue/product/Screenshot/RenderInteriorConcept18-1920x1080-f6ffe7081d0b9822d177d75e45f11d4d.png?resize=1&w=1920)',
           backgroundRepeat: 'no-repeat',
           backgroundSize: 'cover',
           backgroundBlendMode: 'multiply'
@@ -100,6 +72,10 @@ export default function PaginaInicial() {
           {/* Formulário */}
           <Box
             as="form"
+            onSubmit={function (event) {
+              event.preventDefault();
+              route.push('/chat');
+            }}
             styleSheet={{
               display: 'flex',
               flexDirection: 'column',
@@ -110,7 +86,7 @@ export default function PaginaInicial() {
               marginBottom: '32px'
             }}
           >
-            <Title tag="h2">Boas vindas de volta!</Title>
+            <Title tag="h2">Bem vindos à Taverna do Murau</Title>
             <Text
               variant="body3"
               styleSheet={{
@@ -122,6 +98,11 @@ export default function PaginaInicial() {
             </Text>
 
             <TextField
+              placeholder="Insira seu GitHub"
+              value={username}
+              onChange={function (event) {
+                setUsername(event.target.value);
+              }}
               fullWidth
               textFieldColors={{
                 neutral: {
@@ -142,6 +123,7 @@ export default function PaginaInicial() {
                 mainColorLight: appConfig.theme.colors.primary[400],
                 mainColorStrong: appConfig.theme.colors.primary[600]
               }}
+              disabled={user ? false : true}
             />
           </Box>
           {/* Formulário */}
@@ -167,7 +149,7 @@ export default function PaginaInicial() {
                 borderRadius: '50%',
                 marginBottom: '16px'
               }}
-              src={`https://github.com/${username}.png`}
+              src={user ? `https://github.com/${user}.png` : defaultImg.src}
             />
             <Text
               variant="body4"
@@ -178,7 +160,18 @@ export default function PaginaInicial() {
                 borderRadius: '1000px'
               }}
             >
-              {username}
+              {name ? name : username ? username : '. . .'}
+            </Text>
+            <Text
+              variant="body4"
+              styleSheet={{
+                color: appConfig.theme.colors.neutrals[200],
+                backgroundColor: appConfig.theme.colors.neutrals[900],
+                padding: '3px 10px',
+                borderRadius: '1000px'
+              }}
+            >
+              {user === '' ? '. . .' : location}
             </Text>
           </Box>
           {/* Photo Area */}
